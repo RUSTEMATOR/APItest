@@ -79,10 +79,27 @@ test.describe('API check promo and tournaments unlogged', async () => {
         console.log(games)
 
         // fs.writeFileSync('games.json', JSON.stringify(games, null, 2))
-
-       
-
       
 
+    })
+
+
+    test('Get all providers', async ({request}) => {
+        const responseProviders = await request.get('/api/content/all-providers', {
+            headers: {
+                            'Authorization': `Bearer ${JWT}`
+                        },
+
+            params: {
+                'currency': 'EUR',
+                'platform_id': 1
+            }
+        })
+
+        const providers = await responseProviders.json()
+
+        console.log(providers)
+
+        fs.writeFileSync('providers.json', JSON.stringify(providers, null, 2))
     })
 })

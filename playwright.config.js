@@ -31,11 +31,11 @@ module.exports = defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on',
 
-    // proxy: {
-    //   'server': 'http://138.197.150.103:8090',
-    //   'username': 'kbc',
-    //   'password': '347SP&Uwqt!2xZ7w',
-    // }
+    proxy: {
+      'server': 'http://138.197.150.103:8090',
+      'username': 'kbc',
+      'password': '347SP&Uwqt!2xZ7w',
+    }
   },
 
   /* Configure projects for major browsers */

@@ -1,8 +1,8 @@
 import { test } from "../src/fixtures/myFixtures"
-import { request } from "playwright/test"
 import { USERS } from "../src/data/users"
 import { expect } from "playwright/test"
 import ExpectedResponse from "../src/data/expectedResponses"
+import Arrays from "../src/data/arrays"
 import fs from 'fs'
 
 test.describe('Check API logging in', async () => {
@@ -31,6 +31,58 @@ test.describe('Check API logging in', async () => {
 })
 
 
+
+
+test.describe('API check games availability by categories', async () => {
+    let JWT
+    const arrays = new Arrays
+
+    test.beforeEach(async ({authController}) => {
+        JWT = await authController.getJwtToken()
+    })
+
+    for(const category of arrays.categories) {
+        for(const currency of arrays.currencies) {
+        test(`Check games availability by category: ${category} with ${currency}`, async ({gamesController}) => {
+
+            const games = await gamesController.getGamesByCategory(JWT, category, currency )
+
+            const numberOfGames = games.data.length
+
+            console.log(numberOfGames)
+
+            expect(numberOfGames).toBeGreaterThan(10)
+        })
+    }
+    }    
+
+})
+
+
+
+test.describe('API check game providers', async () => {
+    let JWT
+    const arrays = new Arrays
+
+    test.beforeEach(async ({authController}) => {
+        JWT = await authController.getJwtToken()
+    })
+
+    for(const currency of arrays.currencies) {
+        test(`Check game providers by ${currency}`, async ({gamesController}) => {
+
+            const providers = await gamesController.getProviders(JWT, currency)
+
+            const numberOfProviders = providers.data.length
+
+            console.log(numberOfProviders)
+
+            expect(numberOfProviders).toBeGreaterThan(1)
+        })
+    }
+})
+
+
 test.describe('API check promo and tournaments unlogged', async () => {
     let JWT
 
@@ -38,27 +90,10 @@ test.describe('API check promo and tournaments unlogged', async () => {
         JWT = await authController.getJwtToken()
     })
 
-    // test('get all banners', async ({request}) => {
-    //     const responseTournamnets = await request.get('/api/tournaments/provider-tournaments', {
-    //         headers: {
-    //             'Authorization': `Bearer ${JWT}`
-    //         },
-
-    //         params: {
-    //             'currency': 'EUR',
-    //             'tournaments_page_code': 'tournaments',
-    //             'platform_id': 1
-    //         }
-    //     })
-
-    //     const tournaments = await responseTournamnets.json()
-
-    //     console.log(tournaments)
-
         
     test('Get all games', async ({request}) => {
 
-        const responseGames = await request.get('/api/games/category/new', {
+        const responseGames = await request.get('/api/games/category/slots', {
             headers: {
                             'Authorization': `Bearer ${JWT}`
                         },
@@ -80,7 +115,6 @@ test.describe('API check promo and tournaments unlogged', async () => {
 
         // fs.writeFileSync('games.json', JSON.stringify(games, null, 2))
       
-
     })
 
 
@@ -102,4 +136,24 @@ test.describe('API check promo and tournaments unlogged', async () => {
 
         fs.writeFileSync('providers.json', JSON.stringify(providers, null, 2))
     })
+
+    test('Fast reg user', async ({request}) => {
+        const requestFastReg = await request.post('/api/auth/fast-registration', {
+            headers: {
+                'Authorization': `Bearer ${JWT}`
+            },
+
+            data: {
+                'email': 'apoko-ross@kingbilly.xyz',
+                'password': '193786Az()',
+            }
+        })
+
+        const response = await requestFastReg.json()
+
+        console.log(response)
+        
+    
+    })
 })
+

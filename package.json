@@ -1,6 +1,7 @@
 {
   "dependencies": {
-    "playwright": "^1.46.1"
+    "playwright": "^1.46.1",
+    "random-email": "^1.0.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.46.1",

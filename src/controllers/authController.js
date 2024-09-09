@@ -2,6 +2,7 @@ export default class AuthController {
 
     #GET_JWT_TOKEN_PATH = "/api/front/auth"
     #LOGIN_PATH = "/api/auth/login"
+    #REGISTRATION_PATH = "/api/auth/fast-registration"
 
     constructor(request) {
         this.request = request
@@ -11,7 +12,7 @@ export default class AuthController {
         const response = await this.request.get(this.#GET_JWT_TOKEN_PATH)
         const jwtToken = await response.json()
 
-        console.log(jwtToken.jwt)
+        // console.log(jwtToken.jwt)
 
         return jwtToken.jwt
 
@@ -35,5 +36,19 @@ export default class AuthController {
         console.log(userInfo)
 
         return userInfo
+    }
+
+    async regUser(JWT, randomEmail, userPassword) {
+        const registrationResponse = await this.request.post(this.#REGISTRATION_PATH, {
+            headers: {
+                'Authorization': `Bearer ${JWT}`
+            },
+
+            data: {
+                email: randomEmail,
+                password:  userPassword,
+                language: 'en'
+            }
+        })
     }
 }

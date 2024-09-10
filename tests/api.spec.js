@@ -2,8 +2,8 @@ import { test } from "../src/fixtures/myFixtures"
 import { USERS } from "../src/data/users"
 import { expect } from "playwright/test"
 import ExpectedResponse from "../src/data/expectedResponses"
+import { generatedEmail, userPassword } from "../src/data/constants"
 import Arrays from "../src/data/arrays"
-import fs from 'fs'
 
 test.describe('Check API logging in', async () => {
     const email = USERS.USER1.email
@@ -24,7 +24,6 @@ test.describe('Check API logging in', async () => {
         delete loggedUser1.messaging__token
         delete loggedUser1.sessionUuid
         
-
         expect(loggedUser1).toEqual(expectedResponse.ofUser1);
         
     })
@@ -50,14 +49,12 @@ test.describe('API check games availability by categories', async () => {
             const numberOfGames = games.data.length
 
             console.log(numberOfGames)
-
+            
             expect(numberOfGames).toBeGreaterThan(10)
         })
     }
     }    
-
 })
-
 
 
 test.describe('API check game providers', async () => {
@@ -82,78 +79,46 @@ test.describe('API check game providers', async () => {
     }
 })
 
-
-test.describe('API check promo and tournaments unlogged', async () => {
+test.describe('API check registration', async () => {
     let JWT
+    const email = generatedEmail
+    const password = userPassword
+
 
     test.beforeEach(async ({authController}) => {
         JWT = await authController.getJwtToken()
     })
 
-        
-    test('Get all games', async ({request}) => {
+    test('Register user', async ({authController}) => {
 
-        const responseGames = await request.get('/api/games/category/slots', {
-            headers: {
-                            'Authorization': `Bearer ${JWT}`
-                        },
-            
-                        params: {
-                            'currency': 'EUR',
-                            'platform_id': 1,
-                            'per_page': 10
-                        }
-        })
+        const registeredUserInfo = await authController.regUser(JWT, email, password)
+        const userID = await registeredUserInfo.userId
 
-        const games = await responseGames.json()
+        const userInfo = await authController.logIn(JWT, email, password)
+        const loggedUserID = await userInfo.userId
 
-        const total = await games.totalCount
-
-        // expect(total).toEqual(173)
-
-        console.log(games)
-
-        // fs.writeFileSync('games.json', JSON.stringify(games, null, 2))
-      
+        expect(userID).toEqual(loggedUserID)
+        expect(registeredUserInfo.messaging__login).toEqual(userInfo.messaging__login)
     })
+})
 
 
-    test('Get all providers', async ({request}) => {
-        const responseProviders = await request.get('/api/content/all-providers', {
-            headers: {
-                            'Authorization': `Bearer ${JWT}`
-                        },
-
-            params: {
-                'currency': 'EUR',
-                'platform_id': 1
-            }
-        })
-
-        const providers = await responseProviders.json()
-
-        console.log(providers)
-
-        fs.writeFileSync('providers.json', JSON.stringify(providers, null, 2))
-    })
-
-    test('Fast reg user', async ({request}) => {
-        const requestFastReg = await request.post('/api/auth/fast-registration', {
-            headers: {
-                'Authorization': `Bearer ${JWT}`
-            },
-
-            data: {
-                'email': 'apoko-ross@kingbilly.xyz',
-                'password': '193786Az()',
-            }
-        })
-
-        const response = await requestFastReg.json()
-
-        console.log(response)
-        
+test.describe('API get banners', async () => {
+    let JWT
     
+    test.beforeEach(async ({authController}) => {
+        JWT = await authController.getJwtToken()
+    })
+
+
+    test('Get banners on the main page', async ({promoController}) => {
+        const banners = await promoController.getMainPageBanners(JWT)
+
+        const numberOfBanners = banners.childs.length
+
+        console.log(numberOfBanners)
+
+        expect(numberOfBanners).toBeGreaterThan(1)
     })
 })
 

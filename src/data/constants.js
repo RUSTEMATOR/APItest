@@ -1,3 +1,7 @@
-import fs from 'fs';
+import randomEmail from "random-email"
 
-export default const randomEmail = 
+
+export const generatedEmail = `automaton_${randomEmail({domain: 'kingbilly.xyz',})}`
+
+
+export const userPassword = '193786Az()'

@@ -1,3 +1,6 @@
+import { expect } from "playwright/test"
+
+
 export default class AuthController {
 
     #GET_JWT_TOKEN_PATH = "/api/front/auth"
@@ -31,9 +34,9 @@ export default class AuthController {
             }
         })
 
-        const userInfo = await loginResponse.json()
+        expect(loginResponse).toBeOK()
 
-        console.log(userInfo)
+        const userInfo = await loginResponse.json()
 
         return userInfo
     }
@@ -50,5 +53,11 @@ export default class AuthController {
                 language: 'en'
             }
         })
+
+        expect(registrationResponse).toBeOK()
+
+        const regiterredUserInfo = await registrationResponse.json()
+
+        return regiterredUserInfo
     }
 }

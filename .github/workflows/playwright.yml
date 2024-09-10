@@ -1,9 +1,18 @@
 name: Playwright Tests
 on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+  # schedule:
+    # - cron: '0 */1 * * *'
+
+  workflow_dispatch:
+    inputs:
+      deployment_target:
+        description: Choose target
+        required: true
+        type: choice
+        options:
+          - Run tests
+
+
 jobs:
   test:
     timeout-minutes: 60
@@ -15,13 +24,35 @@ jobs:
         node-version: lts/*
     - name: Install dependencies
       run: npm ci
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
     - name: Run Playwright tests
       run: npx playwright test
+
+
+    - name: Send email on failure
+      if: failure() # This condition ensures the email is sent only if previous steps fail
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.SMTP_USERNAME }}
+        password: ${{ secrets.SMTP_PASSWORD }}
+        subject: GitHub Actions Workflow Failed
+        to: ${{ secrets.ROSS_EMAIL }}, ${{ secrets.PRODUCT_EMAIL }}, ${{ secrets.LEAD_EMAIL }}, ${{ secrets.MYKHAIL_EMAIL }}
+        from: ${{ secrets.SMTP_USERNAME }}
+        body: |
+          API tests failed. Better check TR!!! 
+
+    - name: send default message
+      if: failure()
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_TO }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        message: "API tests failed. Better check TR!!! "
+
     - uses: actions/upload-artifact@v4
       if: always()
       with:
         name: playwright-report
         path: playwright-report/
-        retention-days: 30
+        retention-days: 3
